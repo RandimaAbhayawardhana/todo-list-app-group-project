@@ -1,6 +1,6 @@
 import React from 'react';
-import { View, Text, CheckBox, Button, TouchableOpacity, StyleSheet } from 'react-native';
-
+import { View, Text, Button, TouchableOpacity, StyleSheet } from 'react-native';
+import Checkbox from 'expo-checkbox';
 
 const styles = StyleSheet.create({
     todoItem: {
@@ -49,7 +49,7 @@ export default function TodoItem({ task, deleteTask, toggleCompleted }) {
     return (
         <View style={styles.todoItem}>
         <View style={styles.checkboxContainer}>
-          <CheckBox
+          <Checkbox
             value={task.completed}
             onValueChange={() => toggleCompleted(task.id)}
             tintColors={{ true: '#4CAF50', false: '#ccc' }} // Green when checked
