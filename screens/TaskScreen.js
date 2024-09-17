@@ -1,8 +1,9 @@
 // screens/TaskScreen.js
 
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, FlatList, SectionList, StyleSheet } from 'react-native';
-import TodoItem from '../components/TodoItem'; // Import your existing TodoItem component
+import { View, TextInput, Text, TouchableOpacity, SectionList, StyleSheet, Modal, Button } from 'react-native';
+import TodoItem from '../components/TodoItem'; // Import your TodoItem component
+import DateTimePicker from '@react-native-community/datetimepicker'; // Install if necessary: npm install @react-native-community/datetimepicker
 
 export default function TaskScreen({ route }) {
   const { listId } = route.params;
@@ -11,23 +12,27 @@ export default function TaskScreen({ route }) {
       id: 1,
       name: 'Personal',
       tasks: [
-        { id: 1, text: 'Doctor Appointment', completed: true },
-        { id: 2, text: 'Meeting at School', completed: false },
+        { id: 1, text: 'Doctor Appointment', description: '', completed: true, dueDate: new Date() },
+        { id: 2, text: 'Meeting at School', description: '', completed: false, dueDate: new Date() },
       ],
     },
     {
       id: 2,
       name: 'Work',
       tasks: [
-        { id: 3, text: 'Submit Report', completed: false },
-        { id: 4, text: 'Team Meeting', completed: false },
+        { id: 3, text: 'Submit Report', description: '', completed: false, dueDate: new Date() },
+        { id: 4, text: 'Team Meeting', description: '', completed: false, dueDate: new Date() },
       ],
     },
   ]);
-
-  const [text, setText] = useState('');
-  const [search, setSearch] = useState('');
+  
   const [selectedList, setSelectedList] = useState(null);
+  const [text, setText] = useState('');
+  const [description, setDescription] = useState('');
+  const [dueDate, setDueDate] = useState(new Date());
+  const [search, setSearch] = useState('');
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
 
   // Update selected list when listId changes
   useEffect(() => {
@@ -43,28 +48,43 @@ export default function TaskScreen({ route }) {
   // Add a new task
   const addTask = () => {
     if (text.trim() !== '') {
-      const newTask = { id: Date.now(), text, completed: false };
-      setLists(lists.map(list =>
+      const newTask = { id: Date.now(), text, description, completed: false, dueDate };
+      const updatedLists = lists.map(list =>
         list.id === listId
           ? { ...list, tasks: [...list.tasks, newTask] }
           : list
-      ));
+      );
+      setLists(updatedLists);
       setText('');
+      setDescription('');
+      setDueDate(new Date());
+      setModalVisible(false); // Close modal after adding task
     }
   };
 
+  // Edit an existing task
+  const editTask = (taskId) => {
+    const taskToEdit = selectedList.tasks.find(task => task.id === taskId);
+    setText(taskToEdit.text);
+    setDescription(taskToEdit.description);
+    setDueDate(new Date(taskToEdit.dueDate));
+    setModalVisible(true);
+    deleteTask(taskId); // Remove the task temporarily to update
+  };
+
   // Delete a task
-  const deleteTask = taskId => {
-    setLists(lists.map(list =>
+  const deleteTask = (taskId) => {
+    const updatedLists = lists.map(list =>
       list.id === listId
         ? { ...list, tasks: list.tasks.filter(task => task.id !== taskId) }
         : list
-    ));
+    );
+    setLists(updatedLists);
   };
 
   // Toggle task completion status
-  const toggleCompleted = taskId => {
-    setLists(lists.map(list =>
+  const toggleCompleted = (taskId) => {
+    const updatedLists = lists.map(list =>
       list.id === listId
         ? {
             ...list,
@@ -73,25 +93,9 @@ export default function TaskScreen({ route }) {
             ),
           }
         : list
-    ));
+    );
+    setLists(updatedLists);
   };
-
-  // Render each task item
-  const renderTask = ({ item }) => (
-    <TodoItem task={item} deleteTask={deleteTask} toggleCompleted={toggleCompleted} />
-  );
-
-  // Sections for incomplete and completed tasks
-  const sections = [
-    {
-      title: 'Incomplete Tasks',
-      data: filteredTasks.filter(task => !task.completed),
-    },
-    {
-      title: 'Completed Tasks',
-      data: filteredTasks.filter(task => task.completed),
-    },
-  ];
 
   return (
     <View style={styles.container}>
@@ -103,27 +107,67 @@ export default function TaskScreen({ route }) {
         onChangeText={setSearch}
       />
       <SectionList
-        sections={sections}
+        sections={[
+          { title: 'Incomplete Tasks', data: filteredTasks.filter(task => !task.completed) },
+          { title: 'Completed Tasks', data: filteredTasks.filter(task => task.completed) }
+        ]}
         keyExtractor={task => task.id.toString()}
-        renderItem={renderTask}
+        renderItem={({ item }) => (
+          <TodoItem 
+            task={item}
+            deleteTask={deleteTask}
+            toggleCompleted={toggleCompleted}
+            editTask={editTask}
+          />
+        )}
         renderSectionHeader={({ section: { title } }) => (
           <Text style={styles.sectionHeader}>{title}</Text>
         )}
         ListHeaderComponent={
           <View style={styles.inputContainer}>
-            <TextInput
-              style={styles.textInput}
-              placeholder="New Task"
-              placeholderTextColor="#999"
-              value={text}
-              onChangeText={setText}
-            />
-            <TouchableOpacity style={styles.addButton} onPress={addTask}>
-              <Text style={styles.addButtonText}>Add Task</Text>
+            <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>
+              <Text style={styles.addButtonText}>Add New Task</Text>
             </TouchableOpacity>
           </View>
         }
       />
+
+      {/* Modal for adding or editing a task */}
+      <Modal visible={modalVisible} animationType="slide">
+        <View style={styles.modalView}>
+          <TextInput
+            placeholder="Task Title"
+            value={text}
+            onChangeText={setText}
+            style={styles.textInput}
+          />
+          <TextInput
+            placeholder="Task Description"
+            value={description}
+            onChangeText={setDescription}
+            style={styles.textInput}
+          />
+          
+          <TouchableOpacity onPress={() => setShowDatePicker(true)}>
+            <Text>Select Due Date: {dueDate.toDateString()}</Text>
+          </TouchableOpacity>
+
+          {showDatePicker && (
+            <DateTimePicker
+              value={dueDate}
+              mode="date"
+              display="default"
+              onChange={(event, selectedDate) => {
+                setShowDatePicker(false);
+                if (selectedDate) setDueDate(selectedDate);
+              }}
+            />
+          )}
+
+          <Button title="Save Task" onPress={addTask} />
+          <Button title="Cancel" color="red" onPress={() => setModalVisible(false)} />
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -144,6 +188,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     color: '#333',
   },
+  sectionHeader: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginVertical: 10,
+    color: '#666',
+  },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -158,6 +208,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     padding: 10,
     color: '#333',
+    borderRadius: 8,
+    borderWidth: 1,
+    marginBottom: 10,
+    borderColor: '#ddd',
   },
   addButton: {
     marginLeft: 10,
@@ -170,10 +224,10 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
   },
-  sectionHeader: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginVertical: 10,
-    color: '#666',
+  modalView: {
+    flex: 1,
+    justifyContent: 'center',
+    padding: 20,
+    backgroundColor: 'white',
   },
 });
