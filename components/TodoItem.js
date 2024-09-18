@@ -1,9 +1,17 @@
 // components/TodoItem.js
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import CheckBox from 'expo-checkbox'; // Use expo-checkbox if necessary
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Modal, TextInput } from 'react-native';
+import CheckBox from 'expo-checkbox'; 
 
 export default function TodoItem({ task, deleteTask, toggleCompleted, editTask }) {
+  const [isEditModalVisible, setEditModalVisible] = useState(false);
+  const [newTaskText, setNewTaskText] = useState(task.text);
+
+  const handleEdit = () => {
+    editTask(task.id, newTaskText);
+    setEditModalVisible(false);
+  };
+
   return (
     <View style={styles.todoItem}>
       <CheckBox
@@ -14,7 +22,7 @@ export default function TodoItem({ task, deleteTask, toggleCompleted, editTask }
       <Text style={[styles.taskText, task.completed && styles.completedText]}>{task.text}</Text>
 
       {/* Edit Button */}
-      <TouchableOpacity style={styles.editButton} onPress={() => editTask(task.id)}>
+      <TouchableOpacity style={styles.editButton} onPress={() => setEditModalVisible(true)}>
         <Text style={styles.editButtonText}>Edit</Text>
       </TouchableOpacity>
 
@@ -22,6 +30,23 @@ export default function TodoItem({ task, deleteTask, toggleCompleted, editTask }
       <TouchableOpacity style={styles.deleteButton} onPress={() => deleteTask(task.id)}>
         <Text style={styles.deleteButtonText}>Delete</Text>
       </TouchableOpacity>
+
+      {/* Edit Task Modal */}
+      <Modal visible={isEditModalVisible} transparent={true}>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <TextInput
+              style={styles.modalInput}
+              value={newTaskText}
+              onChangeText={setNewTaskText}
+              placeholder="Edit task"
+            />
+            <TouchableOpacity style={styles.modalButton} onPress={handleEdit}>
+              <Text style={styles.modalButtonText}>Save</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -64,5 +89,33 @@ const styles = StyleSheet.create({
   deleteButtonText: {
     color: '#fff',
     fontSize: 14,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 10,
+    width: 300,
+  },
+  modalInput: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+    marginBottom: 20,
+    padding: 10,
+  },
+  modalButton: {
+    backgroundColor: '#4CAF50',
+    padding: 10,
+    borderRadius: 5,
+  },
+  modalButtonText: {
+    color: '#fff',
+    textAlign: 'center',
+    fontSize: 16,
   },
 });
