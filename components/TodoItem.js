@@ -1,129 +1,121 @@
+// components/TodoItem.js
 import React, { useState } from 'react';
-import { View, Text, Button, TouchableOpacity, StyleSheet, TextInput } from 'react-native';
-import Checkbox from 'expo-checkbox';
+import { View, Text, TouchableOpacity, StyleSheet, Modal, TextInput } from 'react-native';
+import CheckBox from 'expo-checkbox'; 
+
+export default function TodoItem({ task, deleteTask, toggleCompleted, editTask }) {
+  const [isEditModalVisible, setEditModalVisible] = useState(false);
+  const [newTaskText, setNewTaskText] = useState(task.text);
+
+  const handleEdit = () => {
+    editTask(task.id, newTaskText);
+    setEditModalVisible(false);
+  };
+
+  return (
+    <View style={styles.todoItem}>
+      <CheckBox
+        value={task.completed}
+        onValueChange={() => toggleCompleted(task.id)}
+        tintColors={{ true: '#4CAF50', false: '#ccc' }}
+      />
+      <Text style={[styles.taskText, task.completed && styles.completedText]}>{task.text}</Text>
+
+      {/* Edit Button */}
+      <TouchableOpacity style={styles.editButton} onPress={() => setEditModalVisible(true)}>
+        <Text style={styles.editButtonText}>Edit</Text>
+      </TouchableOpacity>
+
+      {/* Delete Button */}
+      <TouchableOpacity style={styles.deleteButton} onPress={() => deleteTask(task.id)}>
+        <Text style={styles.deleteButtonText}>Delete</Text>
+      </TouchableOpacity>
+
+      {/* Edit Task Modal */}
+      <Modal visible={isEditModalVisible} transparent={true}>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <TextInput
+              style={styles.modalInput}
+              value={newTaskText}
+              onChangeText={setNewTaskText}
+              placeholder="Edit task"
+            />
+            <TouchableOpacity style={styles.modalButton} onPress={handleEdit}>
+              <Text style={styles.modalButtonText}>Save</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+    </View>
+  );
+}
 
 const styles = StyleSheet.create({
   todoItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 10,
-    paddingHorizontal: 15,
+    padding: 10,
+    backgroundColor: '#fff',
     marginVertical: 5,
-    backgroundColor: '#f9f9f9',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    borderRadius: 5,
+    elevation: 1,
   },
-  checkboxContainer: {
-    marginRight: 10,
-  },
-  todoItemText: {
+  taskText: {
     flex: 1,
+    marginLeft: 10,
     fontSize: 16,
     color: '#333',
   },
-  completed: {
+  completedText: {
     textDecorationLine: 'line-through',
     color: '#999',
   },
+  editButton: {
+    backgroundColor: '#2196F3',
+    padding: 5,
+    marginRight: 10,
+    borderRadius: 5,
+  },
+  editButtonText: {
+    color: '#fff',
+    fontSize: 14,
+  },
   deleteButton: {
     backgroundColor: '#FF6347',
-    paddingVertical: 6,
-    paddingHorizontal: 10,
+    padding: 5,
     borderRadius: 5,
   },
   deleteButtonText: {
     color: '#fff',
     fontSize: 14,
   },
-  editButton: {
-    backgroundColor: '#4CAF50',
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    borderRadius: 5,
-    marginRight: 10,
-  },
-  editButtonText: {
-    color: '#fff',
-    fontSize: 14,
-  },
-  input: {
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-    paddingVertical: 5,
+  modalContainer: {
     flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
-  dueDate: {
-    fontSize: 12,
-    color: '#888',
+  modalContent: {
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 10,
+    width: 300,
+  },
+  modalInput: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+    marginBottom: 20,
+    padding: 10,
+  },
+  modalButton: {
+    backgroundColor: '#4CAF50',
+    padding: 10,
+    borderRadius: 5,
+  },
+  modalButtonText: {
+    color: '#fff',
+    textAlign: 'center',
+    fontSize: 16,
   },
 });
-
-export default function TodoItem({ task, deleteTask, toggleCompleted, editTask }) {
-  const [isEditing, setIsEditing] = useState(false);
-  const [newText, setNewText] = useState(task.text);
-  const [newDueDate, setNewDueDate] = useState(task.dueDate || '');
-
-  const handleSave = () => {
-    editTask(task.id, newText, newDueDate);
-    setIsEditing(false);
-  };
-
-  return (
-    <View style={styles.todoItem}>
-      <View style={styles.checkboxContainer}>
-        <Checkbox
-          value={task.completed}
-          onValueChange={() => toggleCompleted(task.id)}
-          tintColors={{ true: '#4CAF50', false: '#ccc' }} // Green when checked
-        />
-      </View>
-      {isEditing ? (
-        <View style={{ flex: 1 }}>
-          <TextInput
-            style={styles.input}
-            value={newText}
-            onChangeText={setNewText}
-            placeholder="Task description"
-          />
-          <TextInput
-            style={styles.input}
-            value={newDueDate}
-            onChangeText={setNewDueDate}
-            placeholder="Due Date (e.g., 2024-09-30)"
-          />
-          <TouchableOpacity style={styles.editButton} onPress={handleSave}>
-            <Text style={styles.editButtonText}>Save</Text>
-          </TouchableOpacity>
-        </View>
-      ) : (
-        <View style={{ flex: 1 }}>
-          <Text style={[styles.todoItemText, task.completed && styles.completed]}>
-            {task.text}
-          </Text>
-          {task.dueDate ? <Text style={styles.dueDate}>Due: {task.dueDate}</Text> : null}
-        </View>
-      )}
-      <View style={{ flexDirection: 'row' }}>
-        <TouchableOpacity
-          style={styles.editButton}
-          onPress={() => setIsEditing(!isEditing)}
-        >
-          <Text style={styles.editButtonText}>{isEditing ? 'Save' : 'Edit'}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.deleteButton}
-          onPress={() => deleteTask(task.id)}
-        >
-          <Text style={styles.deleteButtonText}>Delete</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
-}
