@@ -1,9 +1,8 @@
-// components/Sidebar.js
-
 import React, { useEffect, useRef } from 'react';
 import { View, TextInput, StyleSheet, Switch, TouchableOpacity, Text, Animated, Image } from 'react-native';
+import { Ionicons } from '@expo/vector-icons'; // Import icons
 
-const Sidebar = ({ onSearch, onToggleTheme, isDarkMode, isVisible, name, email, profileImage }) => {
+const Sidebar = ({ onSearch, onToggleTheme, isDarkMode, isVisible, name, email, profileImage, onMenuSelect }) => {
     const slideAnim = useRef(new Animated.Value(-250)).current;
 
     useEffect(() => {
@@ -14,13 +13,20 @@ const Sidebar = ({ onSearch, onToggleTheme, isDarkMode, isVisible, name, email, 
         }).start();
     }, [isVisible]);
 
+    const menuItems = [
+        { title: 'Profile', icon: 'person', action: () => onMenuSelect('Profile') },
+        { title: 'My Tasks', icon: 'checkmark-circle', action: () => onMenuSelect('MyTasks') },
+        { title: 'Logout', icon: 'log-out', action: () => onMenuSelect('Logout') },
+    ];
+
     return (
         <Animated.View 
             style={[styles.container, { transform: [{ translateX: slideAnim }] }, isDarkMode ? styles.darkContainer : styles.lightContainer]}
         >
+            {/* Profile Info */}
             <View style={styles.profileContainer}>
                 <Image 
-                    source={{ uri: profileImage || 'https://example.com/default-profile-pic.jpg' }} // Replace with actual image URL or state
+                    source={{ uri: profileImage || 'https://example.com/default-profile-pic.jpg' }}
                     style={styles.profileImage}
                 />
                 <View>
@@ -29,12 +35,15 @@ const Sidebar = ({ onSearch, onToggleTheme, isDarkMode, isVisible, name, email, 
                 </View>
             </View>
 
+            {/* Search Input */}
             <TextInput
-                style={styles.searchInput}
+                style={[styles.searchInput, { borderColor: isDarkMode ? '#555' : '#ccc' }]}
                 placeholder="Search..."
                 onChangeText={onSearch}
                 placeholderTextColor={isDarkMode ? '#ccc' : '#555'}
             />
+
+            {/* Theme Toggle */}
             <View style={styles.themeToggle}>
                 <Text style={{ color: isDarkMode ? '#fff' : '#000' }}>
                     {isDarkMode ? "Light Mode" : "Dark Mode"}
@@ -43,6 +52,16 @@ const Sidebar = ({ onSearch, onToggleTheme, isDarkMode, isVisible, name, email, 
                     value={isDarkMode}
                     onValueChange={onToggleTheme}
                 />
+            </View>
+
+            {/* Menu Items */}
+            <View style={styles.menuContainer}>
+                {menuItems.map((item, index) => (
+                    <TouchableOpacity key={index} style={styles.menuItem} onPress={item.action}>
+                        <Ionicons name={item.icon} size={24} color={isDarkMode ? '#fff' : '#000'} />
+                        <Text style={[styles.menuText, { color: isDarkMode ? '#fff' : '#000' }]}>{item.title}</Text>
+                    </TouchableOpacity>
+                ))}
             </View>
         </Animated.View>
     );
@@ -82,16 +101,27 @@ const styles = StyleSheet.create({
     },
     searchInput: {
         height: 40,
-        borderColor: '#ccc',
         borderWidth: 1,
         borderRadius: 5,
-        paddingHorizontal: 20,
+        paddingHorizontal: 10,
         marginTop: 20,
     },
     themeToggle: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 20,
+        marginVertical: 20,
+    },
+    menuContainer: {
+        marginTop: 20,
+    },
+    menuItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 10,
+    },
+    menuText: {
+        fontSize: 16,
+        marginLeft: 15,
     },
 });
 
