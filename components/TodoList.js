@@ -39,7 +39,6 @@ export default function TodoList() {
   const onSpeechResults = (e) => {
     const spokenText = e.value[0];
     if (spokenText) {
-      setText(spokenText);
       addTask(spokenText);
     }
   };
@@ -67,7 +66,7 @@ export default function TodoList() {
             : list
         )
       );
-      setText('');
+      setText(''); // Clear the input field after adding the task
     }
   };
 

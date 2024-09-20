@@ -1,8 +1,8 @@
 import React, { useEffect, useRef } from 'react';
-import { View, StyleSheet, Switch, TouchableOpacity, Text, Animated, Image } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { View, TextInput, StyleSheet, Switch, TouchableOpacity, Text, Animated, Image } from 'react-native';
+import { Ionicons } from '@expo/vector-icons'; // Import icons
 
-const Sidebar = ({ onToggleTheme, isDarkMode, isVisible, name, email, profileImage, onMenuSelect }) => {
+const Sidebar = ({ onSearch, onToggleTheme, isDarkMode, isVisible, name, email, profileImage, onMenuSelect }) => {
     const slideAnim = useRef(new Animated.Value(-250)).current;
 
     useEffect(() => {
@@ -35,6 +35,14 @@ const Sidebar = ({ onToggleTheme, isDarkMode, isVisible, name, email, profileIma
                     <Text style={{ color: isDarkMode ? '#ccc' : '#555' }}>{email || 'user@example.com'}</Text>
                 </View>
             </View>
+
+            {/* Search Input */}
+            <TextInput
+                style={[styles.searchInput, { borderColor: isDarkMode ? '#555' : '#ccc' }]}
+                placeholder="Search..."
+                onChangeText={onSearch}
+                placeholderTextColor={isDarkMode ? '#ccc' : '#555'}
+            />
 
             {/* Theme Toggle */}
             <View style={styles.themeToggle}>
@@ -91,6 +99,13 @@ const styles = StyleSheet.create({
     profileName: {
         fontSize: 18,
         fontWeight: 'bold',
+    },
+    searchInput: {
+        height: 40,
+        borderWidth: 1,
+        borderRadius: 5,
+        paddingHorizontal: 10,
+        marginTop: 20,
     },
     themeToggle: {
         flexDirection: 'row',
