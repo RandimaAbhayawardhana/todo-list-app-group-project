@@ -1,7 +1,5 @@
-// screens/ProfileScreen.js
-
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert, Image } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Alert, Image, TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { launchImageLibrary } from 'react-native-image-picker';
 
@@ -73,10 +71,16 @@ export default function ProfileScreen({ onProfileChange, onDeleteProfile }) {
 
   return (
     <View style={styles.container}>
+ 
+
+      {/* Profile Photo Section */}
       <Text style={styles.label}>Profile Photo</Text>
       <Image source={{ uri: profileImage || 'https://example.com/default-profile-pic.jpg' }} style={styles.profileImage} />
-      <Button title="Change Profile Photo" onPress={changeProfilePhoto} />
-      
+      <TouchableOpacity style={[styles.buttonContainer, { backgroundColor: 'blue', marginTop: 10 }]} onPress={changeProfilePhoto}>
+        <Text style={styles.buttonText}>Change Profile Photo</Text>
+      </TouchableOpacity>
+
+      {/* Name Input */}
       <Text style={styles.label}>Name</Text>
       <TextInput 
         style={styles.input} 
@@ -85,6 +89,7 @@ export default function ProfileScreen({ onProfileChange, onDeleteProfile }) {
         placeholder="Enter your name" 
       />
       
+      {/* Email Input */}
       <Text style={styles.label}>Email</Text>
       <TextInput 
         style={styles.input} 
@@ -93,9 +98,15 @@ export default function ProfileScreen({ onProfileChange, onDeleteProfile }) {
         placeholder="Enter your email" 
         keyboardType="email-address" 
       />
-      
-      <Button title="Save Profile" onPress={saveProfile} />
-      <Button title="Delete Profile" onPress={deleteProfile} color="red" />
+
+      {/* Save and Delete Profile Buttons */}
+      <TouchableOpacity style={[styles.buttonContainer, { backgroundColor: 'blue', marginTop: 10 }]}onPress={saveProfile}>
+        <Text style={styles.buttonText}>Save Profile</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={[styles.buttonContainer, { backgroundColor: 'red', marginTop: 10 }]} onPress={deleteProfile}>
+        <Text style={styles.buttonText}>Delete Profile</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -106,6 +117,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     flex: 1,
   },
+
   label: {
     fontSize: 16,
     marginBottom: 8,
@@ -122,5 +134,18 @@ const styles = StyleSheet.create({
     height: 100,
     borderRadius: 50,
     marginBottom: 20,
+    alignSelf: 'center', // Centers the profile image
+  },
+  buttonContainer: {
+    backgroundColor: '#4CAF50',
+    padding: 12,
+    borderRadius: 8, // Curves the button corners
+    marginBottom: 20, // Adds space between buttons and inputs
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });

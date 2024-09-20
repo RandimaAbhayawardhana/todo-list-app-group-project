@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, TextInput, Text, TouchableOpacity, FlatList, SectionList, StyleSheet, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import TodoItem from './TodoItem';
+import Voice from 'react-native-voice';
 
 export default function TodoList() {
   const [lists, setLists] = useState([
@@ -28,14 +29,37 @@ export default function TodoList() {
   const [newListName, setNewListName] = useState('');
   const [search, setSearch] = useState('');
 
+  useEffect(() => {
+    Voice.onSpeechResults = onSpeechResults;
+    return () => {
+      Voice.destroy().then(Voice.removeAllListeners);
+    };
+  }, []);
+
+  const onSpeechResults = (e) => {
+    const spokenText = e.value[0];
+    if (spokenText) {
+      setText(spokenText);
+      addTask(spokenText);
+    }
+  };
+
+  const startVoiceRecognition = async () => {
+    try {
+      await Voice.start('en-US');
+    } catch (error) {
+      console.error('Error starting Voice:', error);
+    }
+  };
+
   const selectedList = lists.find(list => list.id === selectedListId) || {};
   const filteredTasks = selectedList.tasks ? selectedList.tasks.filter(task =>
     task.text.toLowerCase().includes(search.toLowerCase())
   ) : [];
 
-  const addTask = () => {
-    if (text.trim() !== '') {
-      const newTask = { id: Date.now(), text, completed: false };
+  const addTask = (taskText) => {
+    if (taskText.trim() !== '') {
+      const newTask = { id: Date.now(), text: taskText, completed: false };
       setLists(
         lists.map(list =>
           list.id === selectedListId
@@ -175,6 +199,9 @@ export default function TodoList() {
         <TouchableOpacity style={styles.addButton} onPress={addTask}>
           <Text style={styles.addButtonText}>Add Task</Text>
         </TouchableOpacity>
+        <TouchableOpacity style={styles.voiceButton} onPress={startVoiceRecognition}>
+          <Icon name="mic" size={24} color="#4CAF50" />
+        </TouchableOpacity>
       </View>
       <View style={styles.inputContainer}>
         <TextInput
@@ -226,6 +253,9 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 15,
     borderRadius: 8,
+  },
+  voiceButton: {
+    marginLeft: 10,
   },
   addButtonText: {
     color: '#fff',

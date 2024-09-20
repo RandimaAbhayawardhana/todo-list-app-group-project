@@ -1,5 +1,3 @@
-// navigation/AppNavigator.js
-
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -14,19 +12,32 @@ import TaskScreen from '../screens/TaskScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import NotificationsScreen from '../screens/NotificationsScreen';
 
-const Tab = createBottomTabNavigator();
-const Stack = createStackNavigator();
-
-// Nested Stack for Task Management (ListScreen and TaskScreen)
-function TaskStack() {
+// Stack Navigator for Task Management (ListScreen and TaskScreen)
+const TaskStack = createStackNavigator();
+function TaskStackNavigator() {
   return (
-    <Stack.Navigator initialRouteName="ListScreen">
-      <Stack.Screen name="ListScreen" component={ListScreen} options={{ title: 'Task Lists' }} />
-      <Stack.Screen name="TaskScreen" component={TaskScreen} options={{ title: 'Tasks' }} />
-    </Stack.Navigator>
+    <TaskStack.Navigator initialRouteName="ListScreen">
+      <TaskStack.Screen name="ListScreen" component={ListScreen} options={{ title: 'Task Lists' }} />
+      <TaskStack.Screen name="TaskScreen" component={TaskScreen} options={{ title: 'Tasks' }} />
+    </TaskStack.Navigator>
   );
 }
 
+// Stack Navigator for Profile
+const ProfileStack = createStackNavigator();
+function ProfileStackNavigator({ onProfileChange }) {
+  return (
+    <ProfileStack.Navigator initialRouteName="Profile">
+      <ProfileStack.Screen name="Profile">
+        {() => <ProfileScreen onProfileChange={onProfileChange} />}
+      </ProfileStack.Screen>
+      {/* Add other profile-related screens here if needed */}
+    </ProfileStack.Navigator>
+  );
+}
+
+// Bottom Tab Navigator
+const Tab = createBottomTabNavigator();
 export default function AppNavigator({ onProfileChange }) {
   return (
     <NavigationContainer>
@@ -48,10 +59,10 @@ export default function AppNavigator({ onProfileChange }) {
           tabBarStyle: { paddingBottom: 5, height: 60 },
         })}
       >
-        <Tab.Screen name="Tasks" component={TaskStack} />
+        <Tab.Screen name="Tasks" component={TaskStackNavigator} />
         <Tab.Screen name="Notifications" component={NotificationsScreen} />
         <Tab.Screen name="Profile">
-          {() => <ProfileScreen onProfileChange={onProfileChange} />}
+          {() => <ProfileStackNavigator onProfileChange={onProfileChange} />}
         </Tab.Screen>
       </Tab.Navigator>
     </NavigationContainer>
