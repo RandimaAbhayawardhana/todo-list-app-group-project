@@ -16,6 +16,7 @@ const Sidebar = ({ onSearch, onToggleTheme, isDarkMode, isVisible, name, email, 
     const menuItems = [
         { title: 'Profile', icon: 'person', action: () => onMenuSelect('Profile') },
         { title: 'My Tasks', icon: 'checkmark-circle', action: () => onMenuSelect('MyTasks') },
+        { title: 'Text Size', icon: 'options', action: () => onMenuSelect('TextSize') },
         { title: 'Logout', icon: 'log-out', action: () => onMenuSelect('Logout') },
     ];
 
