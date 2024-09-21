@@ -1,31 +1,11 @@
-// screens/TaskScreen.js
 
 import React, { useState, useEffect } from 'react';
 import { View, TextInput, Text, TouchableOpacity, SectionList, StyleSheet, Modal, Button } from 'react-native';
-import TodoItem from '../components/TodoItem'; // Import your TodoItem component
-import DateTimePicker from '@react-native-community/datetimepicker'; // Install if necessary: npm install @react-native-community/datetimepicker
+import TodoItem from '../components/TodoItem';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
-export default function TaskScreen({ route }) {
-  const { listId } = route.params;
-  const [lists, setLists] = useState([
-    {
-      id: 1,
-      name: 'Personal',
-      tasks: [
-        { id: 1, text: 'Doctor Appointment', description: '', completed: true, dueDate: new Date() },
-        { id: 2, text: 'Meeting at School', description: '', completed: false, dueDate: new Date() },
-      ],
-    },
-    {
-      id: 2,
-      name: 'Work',
-      tasks: [
-        { id: 3, text: 'Submit Report', description: '', completed: false, dueDate: new Date() },
-        { id: 4, text: 'Team Meeting', description: '', completed: false, dueDate: new Date() },
-      ],
-    },
-  ]);
-  
+export default function TaskScreen({ route  }) {
+  const { listId , setTaskLists , lists } = route.params;
   const [selectedList, setSelectedList] = useState(null);
   const [text, setText] = useState('');
   const [description, setDescription] = useState('');
@@ -33,32 +13,62 @@ export default function TaskScreen({ route }) {
   const [search, setSearch] = useState('');
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+  const [localList , setLocalList] = useState([])
+  const [completedList , setCompletedList] = useState([])
+  const [incompletedList , setInCompletedList] = useState([])
 
-  // Update selected list when listId changes
   useEffect(() => {
-    const list = lists.find(list => list.id === listId);
+    setLocalList(lists)
+  }, [lists])
+
+  useEffect(() => {
+    const list = localList.find(list => list.id === listId);
     setSelectedList(list || { tasks: [] });
-  }, [listId, lists]);
+    console.log('changed')
+  }, [listId , localList]);
 
   // Filter tasks based on search query
-  const filteredTasks = selectedList?.tasks.filter(task =>
-    task.text.toLowerCase().includes(search.toLowerCase())
-  ) || [];
+  useEffect(() => {    
+    
+    if(search == '' && selectedList){
+      handlePrepareLists()
+    }
+
+    if(selectedList){
+      setInCompletedList(selectedList.tasks.filter(task => !task.completed).filter(task =>task.text.toLowerCase().includes(search.toLowerCase())))
+      setCompletedList(selectedList.tasks.filter(task => task.completed).filter(task =>task.text.toLowerCase().includes(search.toLowerCase())))
+    }
+    
+  }, [search])
+
+  useEffect(() => {
+    handlePrepareLists();
+  }, [selectedList])
+
+  const handlePrepareLists = () => {
+    if(selectedList){
+      setInCompletedList(selectedList.tasks.filter(task => !task.completed))
+      setCompletedList(selectedList.tasks.filter(task => task.completed))
+    }
+  }
 
   // Add a new task
   const addTask = () => {
     if (text.trim() !== '') {
       const newTask = { id: Date.now(), text, description, completed: false, dueDate };
-      const updatedLists = lists.map(list =>
+      const updatedLists = localList.map(list =>
         list.id === listId
           ? { ...list, tasks: [...list.tasks, newTask] }
           : list
       );
-      setLists(updatedLists);
+      console.log("updated list ----> " , updatedLists)
+      // setLists(updatedLists);
+      setTaskLists(updatedLists)
+      setLocalList(updatedLists)
       setText('');
       setDescription('');
       setDueDate(new Date());
-      setModalVisible(false); // Close modal after adding task
+      setModalVisible(false);
     }
   };
 
@@ -74,17 +84,18 @@ export default function TaskScreen({ route }) {
 
   // Delete a task
   const deleteTask = (taskId) => {
-    const updatedLists = lists.map(list =>
+    const updatedLists = localList.map(list =>
       list.id === listId
         ? { ...list, tasks: list.tasks.filter(task => task.id !== taskId) }
         : list
     );
-    setLists(updatedLists);
+    setTaskLists(updatedLists);
+    setLocalList(updatedLists)
   };
 
   // Toggle task completion status
   const toggleCompleted = (taskId) => {
-    const updatedLists = lists.map(list =>
+    const updatedLists = localList.map(list =>
       list.id === listId
         ? {
             ...list,
@@ -94,7 +105,8 @@ export default function TaskScreen({ route }) {
           }
         : list
     );
-    setLists(updatedLists);
+    setTaskLists(updatedLists);
+    setLocalList(updatedLists)
   };
 
   return (
@@ -108,8 +120,8 @@ export default function TaskScreen({ route }) {
       />
       <SectionList
         sections={[
-          { title: 'Incomplete Tasks', data: filteredTasks.filter(task => !task.completed) },
-          { title: 'Completed Tasks', data: filteredTasks.filter(task => task.completed) }
+          { title: 'Incomplete Tasks', data: incompletedList },
+          { title: 'Completed Tasks', data: completedList }
         ]}
         keyExtractor={task => task.id.toString()}
         renderItem={({ item }) => (

@@ -1,34 +1,18 @@
-import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
-import AppNavigator from './navigation/AppNavigator';
-import Sidebar from './components/Sidebar';
+import React, { useEffect, useState } from 'react';
 import Icon from 'react-native-vector-icons/Ionicons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import Sidebar from '../components/Sidebar';
 
-export default function App() {
+
+
+export default function SidebarWrapper() {
+
     const [isDarkMode, setIsDarkMode] = useState(false);
     const [isSidebarVisible, setIsSidebarVisible] = useState(false);
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [profileImage, setProfileImage] = useState(null);
     
-
-    // Load profile from AsyncStorage
-    useEffect(() => {
-        const loadProfile = async () => {
-            try {
-                const storedName = await AsyncStorage.getItem('name');
-                const storedEmail = await AsyncStorage.getItem('email');
-                const storedImage = await AsyncStorage.getItem('profileImage');
-                if (storedName) setName(storedName);
-                if (storedEmail) setEmail(storedEmail);
-                if (storedImage) setProfileImage(storedImage);
-            } catch (error) {
-                console.error('Failed to load profile:', error);
-            }
-        };
-        loadProfile();
-    }, []);
 
     // Handle sidebar search input
     const handleSearch = (text) => {
@@ -88,10 +72,12 @@ export default function App() {
         await AsyncStorage.removeItem('profileImage');
         console.log('Profile deleted');
     };
+    
+
 
     return (
-        <View style={[styles.container, { backgroundColor: isDarkMode ? '#000' : '#fff' }]}>
-            
+        <View>
+            {/* Button to open sidebar */}
             <TouchableOpacity onPress={toggleSidebar} style={styles.iconButton}>
                 <Icon name="menu" size={25} color={isDarkMode ? '#fff' : '#000'} />
             </TouchableOpacity>
@@ -114,14 +100,13 @@ export default function App() {
                 name={name}
                 email={email}
                 profileImage={profileImage}
-                onMenuSelect={handleMenuSelect}
+                onMenuSelect={handleMenuSelect} // Pass handleMenuSelect for menu actions
             />
 
-            {/* Main content */}
-            <AppNavigator onProfileChange={updateProfile} onDeleteProfile={deleteProfile} />
         </View>
-    );
+    )
 }
+
 
 const styles = StyleSheet.create({
     container: {

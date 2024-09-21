@@ -5,13 +5,13 @@ import Sidebar from './components/Sidebar';
 import Icon from 'react-native-vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+
 export default function App() {
     const [isDarkMode, setIsDarkMode] = useState(false);
     const [isSidebarVisible, setIsSidebarVisible] = useState(false);
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [profileImage, setProfileImage] = useState(null);
-    
 
     // Load profile from AsyncStorage
     useEffect(() => {
@@ -91,20 +91,19 @@ export default function App() {
 
     return (
         <View style={[styles.container, { backgroundColor: isDarkMode ? '#000' : '#fff' }]}>
-            
+            {/* Button to open sidebar */}
             <TouchableOpacity onPress={toggleSidebar} style={styles.iconButton}>
                 <Icon name="menu" size={25} color={isDarkMode ? '#fff' : '#000'} />
             </TouchableOpacity>
 
-            {/* Overlay to close the sidebar */}
-            {isSidebarVisible && (
-                <TouchableOpacity 
-                    style={styles.overlay} 
-                    onPress={closeSidebar} 
-                    activeOpacity={1} 
-                />
-            )}
-
+                {/* Overlay to close the sidebar */}
+                {isSidebarVisible && (
+                    <TouchableOpacity 
+                        style={styles.overlay} 
+                        onPress={closeSidebar} 
+                        activeOpacity={1} 
+                    />
+                )}
             {/* Sidebar Component */}
             <Sidebar 
                 onSearch={handleSearch}
@@ -114,7 +113,7 @@ export default function App() {
                 name={name}
                 email={email}
                 profileImage={profileImage}
-                onMenuSelect={handleMenuSelect}
+                onMenuSelect={handleMenuSelect} // Pass handleMenuSelect for menu actions
             />
 
             {/* Main content */}

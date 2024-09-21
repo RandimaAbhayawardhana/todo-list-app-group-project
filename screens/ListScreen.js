@@ -1,18 +1,23 @@
 // screens/ListScreen.js
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, Alert, TextInput, Modal, Button } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import SidebarWrapper from '../components/SidebarWrapper';
 
 export default function ListScreen() {
   const navigation = useNavigation();
-  const [lists, setLists] = useState([{ id: 1, name: 'Personal', tasks: [] }, { id: 2, name: 'Work', tasks: [] }]);
+  const [lists, setTaskLists] = useState([{ id: 1, name: 'Personal', tasks: [] }, { id: 2, name: 'Work', tasks: [] }]);
   const [newListName, setNewListName] = useState('');
   const [modalVisible, setModalVisible] = useState(false); // For adding a new list
 
   const handleSelectList = (listId) => {
-    navigation.navigate('TaskScreen', { listId });
+    navigation.navigate('TaskScreen', { listId , setTaskLists , lists  });
   };
+
+  useEffect(() => {
+    console.log('list updates --->  ' , lists)
+  }, [lists])
 
   const deleteList = (listId) => {
     Alert.alert(
@@ -23,7 +28,7 @@ export default function ListScreen() {
         {
           text: 'Delete',
           style: 'destructive',
-          onPress: () => setLists(lists.filter(list => list.id !== listId)),
+          onPress: () => setTaskLists(lists.filter(list => list.id !== listId)),
         },
       ]
     );
@@ -32,9 +37,9 @@ export default function ListScreen() {
   const addNewList = () => {
     if (newListName.trim()) {
       const newList = { id: Date.now(), name: newListName, tasks: [] };
-      setLists([...lists, newList]);
+      setTaskLists([...lists, newList]);
       setNewListName('');
-      setModalVisible(false); // Close modal after adding the list
+      setModalVisible(false);
     } else {
       Alert.alert('Error', 'Please enter a list name.');
     }
