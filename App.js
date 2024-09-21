@@ -4,6 +4,7 @@ import AppNavigator from './navigation/AppNavigator';
 import Sidebar from './components/Sidebar';
 import Icon from 'react-native-vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { TextSizeProvider } from './src/context/TextSizeContext';
 
 export default function App() {
     const [isDarkMode, setIsDarkMode] = useState(false);
@@ -90,7 +91,8 @@ export default function App() {
     };
 
     return (
-        <View style={[styles.container, { backgroundColor: isDarkMode ? '#000' : '#fff' }]}>
+        <TextSizeProvider>
+            <View style={[styles.container, { backgroundColor: isDarkMode ? '#000' : '#fff' }]}>
             {/* Button to open sidebar */}
             <TouchableOpacity onPress={toggleSidebar} style={styles.iconButton}>
                 <Icon name="menu" size={25} color={isDarkMode ? '#fff' : '#000'} />
@@ -120,6 +122,8 @@ export default function App() {
             {/* Main content */}
             <AppNavigator onProfileChange={updateProfile} onDeleteProfile={deleteProfile} />
         </View>
+        </TextSizeProvider>
+        
     );
 }
 

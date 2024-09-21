@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -11,6 +11,7 @@ import TaskScreen from '../screens/TaskScreen';
 // New Screens
 import ProfileScreen from '../screens/ProfileScreen';
 import NotificationsScreen from '../screens/NotificationsScreen';
+import { TextSizeContext, TextSizeProvider } from '../src/context/TextSizeContext';
 
 // Stack Navigator for Task Management (ListScreen and TaskScreen)
 const TaskStack = createStackNavigator();
@@ -39,8 +40,12 @@ function ProfileStackNavigator({ onProfileChange }) {
 // Bottom Tab Navigator
 const Tab = createBottomTabNavigator();
 export default function AppNavigator({ onProfileChange }) {
+
+  const { textSize } = useContext(TextSizeContext);
+
   return (
-    <NavigationContainer>
+    <TextSizeProvider>
+      <NavigationContainer>
       <Tab.Navigator
         screenOptions={({ route }) => ({
           tabBarIcon: ({ color, size }) => {
@@ -66,5 +71,7 @@ export default function AppNavigator({ onProfileChange }) {
         </Tab.Screen>
       </Tab.Navigator>
     </NavigationContainer>
+    </TextSizeProvider>
+   
   );
 }

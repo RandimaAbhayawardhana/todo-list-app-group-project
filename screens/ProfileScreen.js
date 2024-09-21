@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert, Image, TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { launchImageLibrary } from 'react-native-image-picker';
+import { TextSizeContext } from '../src/context/TextSizeContext';
 
 export default function ProfileScreen({ onProfileChange, onDeleteProfile }) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [profileImage, setProfileImage] = useState('');
+  const { textSize } = useContext(TextSizeContext);
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -74,25 +76,25 @@ export default function ProfileScreen({ onProfileChange, onDeleteProfile }) {
  
 
       {/* Profile Photo Section */}
-      <Text style={styles.label}>Profile Photo</Text>
+      <Text style={[styles.label,{fontSize:textSize}]}>Profile Photo</Text>
       <Image source={{ uri: profileImage || 'https://example.com/default-profile-pic.jpg' }} style={styles.profileImage} />
       <TouchableOpacity style={[styles.buttonContainer, { backgroundColor: 'blue', marginTop: 10 }]} onPress={changeProfilePhoto}>
-        <Text style={styles.buttonText}>Change Profile Photo</Text>
+        <Text style={[styles.buttonText,{fontSize:textSize}]}>Change Profile Photo</Text>
       </TouchableOpacity>
 
       {/* Name Input */}
-      <Text style={styles.label}>Name</Text>
+      <Text style={[styles.label,{fontSize:textSize}]}>Name</Text>
       <TextInput 
-        style={styles.input} 
+        style={[styles.input,{fontSize:textSize}]} 
         value={name} 
         onChangeText={setName} 
         placeholder="Enter your name" 
       />
       
       {/* Email Input */}
-      <Text style={styles.label}>Email</Text>
+      <Text style={[styles.label,{fontSize:textSize}]}>Email</Text>
       <TextInput 
-        style={styles.input} 
+        style={[styles.input,{fontSize:textSize}]} 
         value={email} 
         onChangeText={setEmail} 
         placeholder="Enter your email" 
@@ -101,11 +103,11 @@ export default function ProfileScreen({ onProfileChange, onDeleteProfile }) {
 
       {/* Save and Delete Profile Buttons */}
       <TouchableOpacity style={[styles.buttonContainer, { backgroundColor: 'blue', marginTop: 10 }]}onPress={saveProfile}>
-        <Text style={styles.buttonText}>Save Profile</Text>
+        <Text style={[styles.buttonText,{fontSize:textSize}]}>Save Profile</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={[styles.buttonContainer, { backgroundColor: 'red', marginTop: 10 }]} onPress={deleteProfile}>
-        <Text style={styles.buttonText}>Delete Profile</Text>
+        <Text style={[styles.buttonText,{fontSize:textSize}]}>Delete Profile</Text>
       </TouchableOpacity>
     </View>
   );
@@ -119,7 +121,7 @@ const styles = StyleSheet.create({
   },
 
   label: {
-    fontSize: 16,
+   
     marginBottom: 8,
   },
   input: {
@@ -145,7 +147,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: '#fff',
-    fontSize: 16,
+   
     fontWeight: 'bold',
   },
 });

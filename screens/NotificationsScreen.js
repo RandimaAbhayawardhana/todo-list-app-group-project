@@ -1,11 +1,13 @@
 // screens/NotificationsScreen.js
 
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { TextSizeContext } from '../src/context/TextSizeContext';
 
 export default function NotificationsScreen() {
   const [upcomingTasks, setUpcomingTasks] = useState([]);
+  const { textSize } = useContext(TextSizeContext);
 
   useEffect(() => {
     const loadUpcomingTasks = async () => {
@@ -29,10 +31,10 @@ export default function NotificationsScreen() {
         keyExtractor={item => item.id.toString()}
         renderItem={({ item }) => (
           <View style={styles.taskItem}>
-            <Text style={styles.taskText}>{item.text} - Due: {new Date(item.dueDate).toDateString()}</Text>
+            <Text style={{fontSize:textSize}}>{item.text} - Due: {new Date(item.dueDate).toDateString()}</Text>
           </View>
         )}
-        ListEmptyComponent={<Text>No upcoming tasks</Text>}
+        ListEmptyComponent={<Text style={{fontSize:textSize}}>No upcoming tasks</Text>}
       />
     </View>
   );
@@ -49,7 +51,5 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
   },
-  taskText: {
-    fontSize: 16,
-  },
+ 
 });

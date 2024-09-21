@@ -1,14 +1,16 @@
 // screens/ListScreen.js
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, Alert, TextInput, Modal, Button } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { TextSizeContext } from '../src/context/TextSizeContext';
 
 export default function ListScreen() {
   const navigation = useNavigation();
   const [lists, setLists] = useState([{ id: 1, name: 'Personal', tasks: [] }, { id: 2, name: 'Work', tasks: [] }]);
   const [newListName, setNewListName] = useState('');
   const [modalVisible, setModalVisible] = useState(false); // For adding a new list
+  const { textSize } = useContext(TextSizeContext);
 
   const handleSelectList = (listId) => {
     navigation.navigate('TaskScreen', { listId });
@@ -48,7 +50,7 @@ export default function ListScreen() {
         renderItem={({ item }) => (
           <View style={styles.listItem}>
             <TouchableOpacity style={styles.listButton} onPress={() => handleSelectList(item.id)}>
-              <Text style={styles.listButtonText}>{item.name}</Text>
+              <Text style={[styles.listButtonText,{fontSize:textSize}]}>{item.name}</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => deleteList(item.id)}>
               <Icon name="delete" size={24} color="#FF6347" />
@@ -59,16 +61,16 @@ export default function ListScreen() {
 
       {/* Add New List Button */}
       <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>
-        <Icon name="add" size={30} color="#fff" />
+        <Icon name="add" size={textSize} color="#fff" />
       </TouchableOpacity>
 
       {/* Modal for adding a new task list */}
       <Modal visible={modalVisible} animationType="slide" transparent={true}>
         <View style={styles.modalContainer}>
           <View style={styles.modalView}>
-            <Text style={styles.modalTitle}>Enter Task List Name</Text>
+            <Text style={[styles.modalTitle,{fontSize:textSize}]}>Enter Task List Name</Text>
             <TextInput
-              style={styles.textInput}
+              style={[styles.textInput,{fontFamily:textSize}]}
               value={newListName}
               onChangeText={setNewListName}
               placeholder="New List Name"
@@ -100,7 +102,6 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   listButtonText: {
-    fontSize: 18,
     color: '#333',
   },
   addButton: {
@@ -129,7 +130,7 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   modalTitle: {
-    fontSize: 18,
+   
     marginBottom: 15,
   },
   textInput: {

@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Modal, TextInput, Image } from 'react-native';
 import CheckBox from 'expo-checkbox';
 import { Swipeable } from 'react-native-gesture-handler';
 import { launchImageLibrary } from 'react-native-image-picker';
+import { TextSizeContext } from '../src/context/TextSizeContext';
 
 export default function TodoItem({ task, deleteTask, toggleCompleted, editTask }) {
   const [isEditModalVisible, setEditModalVisible] = useState(false);
@@ -10,6 +11,7 @@ export default function TodoItem({ task, deleteTask, toggleCompleted, editTask }
   const [newTaskText, setNewTaskText] = useState(task.text);
   const [notes, setNotes] = useState(task.notes || '');
   const [attachment, setAttachment] = useState(task.attachment || null);
+  const { textSize } = useContext(TextSizeContext);
 
   const handleEdit = () => {
     editTask(task.id, { text: newTaskText, notes, attachment });
@@ -45,16 +47,16 @@ export default function TodoItem({ task, deleteTask, toggleCompleted, editTask }
           onValueChange={() => toggleCompleted(task.id)}
           tintColors={{ true: '#4CAF50', false: '#ccc' }}
         />
-        <Text style={[styles.taskText, task.completed && styles.completedText]}>{task.text}</Text>
+        <Text style={[styles.taskText,{fontSize:textSize}, task.completed && styles.completedText]}>{task.text}</Text>
 
         {/* View Button */}
         <TouchableOpacity style={styles.viewButton} onPress={() => setViewModalVisible(true)}>
-          <Text style={styles.viewButtonText}>View</Text>
+          <Text style={[styles.viewButtonText,{fontSize:textSize}]}>View</Text>
         </TouchableOpacity>
 
         {/* Edit Button */}
         <TouchableOpacity style={styles.editButton} onPress={() => setEditModalVisible(true)}>
-          <Text style={styles.editButtonText}>Edit</Text>
+          <Text style={[styles.editButtonText,{fontSize:textSize}]}>Edit</Text>
         </TouchableOpacity>
 
         {/* Edit Task Modal */}
@@ -62,23 +64,23 @@ export default function TodoItem({ task, deleteTask, toggleCompleted, editTask }
           <View style={styles.modalContainer}>
             <View style={styles.modalContent}>
               <TextInput
-                style={styles.modalInput}
+                style={[styles.modalInput,{fontSize:textSize}]}
                 value={newTaskText}
                 onChangeText={setNewTaskText}
                 placeholder="Edit task"
               />
               <TextInput
-                style={styles.modalInput}
+                style={[styles.modalInput,{fontSize:textSize}]}
                 value={notes}
                 onChangeText={setNotes}
                 placeholder="Add notes"
               />
               <TouchableOpacity onPress={handleAddAttachment} style={styles.attachmentButton}>
-                <Text style={styles.attachmentButtonText}>Add Attachment</Text>
+                <Text style={[styles.attachmentButtonText,{fontSize:textSize}]}>Add Attachment</Text>
               </TouchableOpacity>
               {attachment && <Image source={{ uri: attachment }} style={styles.attachmentImage} />}
               <TouchableOpacity style={styles.modalButton} onPress={handleEdit}>
-                <Text style={styles.modalButtonText}>Save</Text>
+                <Text style={[styles.modalButtonText,{fontSize:textSize}]}>Save</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -88,17 +90,17 @@ export default function TodoItem({ task, deleteTask, toggleCompleted, editTask }
         <Modal visible={isViewModalVisible} transparent={true}>
           <View style={styles.modalContainer}>
             <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Task Details</Text>
-              <Text style={styles.taskDetailText}>Task: {task.text}</Text>
-              <Text style={styles.taskDetailText}>Notes: {notes}</Text>
+              <Text style={[styles.modalTitle,{fontSize:textSize}]}>Task Details</Text>
+              <Text style={[styles.taskDetailText,{fontSize:textSize}]}>Task: {task.text}</Text>
+              <Text style={[styles.taskDetailText,{fontSize:textSize}]}>Notes: {notes}</Text>
               {attachment && (
                 <Image source={{ uri: attachment }} style={styles.attachmentImage} />
               )}
-              <Text style={styles.taskDetailText}>
+              <Text style={[styles.taskDetailText,{fontSize:textSize}]}>
                 Status: {task.completed ? 'Completed' : 'Incomplete'}
               </Text>
               <TouchableOpacity style={styles.modalButton} onPress={() => setViewModalVisible(false)}>
-                <Text style={styles.modalButtonText}>Close</Text>
+                <Text style={[styles.modalButtonText,{fontSize:textSize}]}>Close</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -121,7 +123,7 @@ const styles = StyleSheet.create({
   taskText: {
     flex: 1,
     marginLeft: 10,
-    fontSize: 16,
+   
     color: '#333',
   },
   completedText: {
@@ -142,7 +144,7 @@ const styles = StyleSheet.create({
   },
   viewButtonText: {
     color: '#fff',
-    fontSize: 14,
+   
   },
   actionsContainer: {
     flexDirection: 'row',
@@ -158,7 +160,7 @@ const styles = StyleSheet.create({
   },
   actionText: {
     color: '#fff',
-    fontSize: 16,
+   
   },
   modalContainer: {
     flex: 1,
@@ -173,12 +175,12 @@ const styles = StyleSheet.create({
     width: 300,
   },
   modalTitle: {
-    fontSize: 18,
+   
     fontWeight: 'bold',
     marginBottom: 10,
   },
   taskDetailText: {
-    fontSize: 16,
+  
     marginVertical: 5,
   },
   modalInput: {
@@ -195,7 +197,7 @@ const styles = StyleSheet.create({
   modalButtonText: {
     color: '#fff',
     textAlign: 'center',
-    fontSize: 16,
+ 
   },
   attachmentButton: {
     backgroundColor: '#2196F3',

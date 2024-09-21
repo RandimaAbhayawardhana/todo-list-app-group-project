@@ -1,12 +1,14 @@
 // screens/TaskScreen.js
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { View, TextInput, Text, TouchableOpacity, SectionList, StyleSheet, Modal, Button } from 'react-native';
 import TodoItem from '../components/TodoItem'; // Import your TodoItem component
 import DateTimePicker from '@react-native-community/datetimepicker'; // Install if necessary: npm install @react-native-community/datetimepicker
+import { TextSizeContext } from '../src/context/TextSizeContext';
 
 export default function TaskScreen({ route }) {
   const { listId } = route.params;
+  const { textSize } = useContext(TextSizeContext);
   const [lists, setLists] = useState([
     {
       id: 1,
@@ -100,7 +102,7 @@ export default function TaskScreen({ route }) {
   return (
     <View style={styles.container}>
       <TextInput
-        style={styles.searchInput}
+        style={[styles.searchInput,{fontSize:textSize}]}
         placeholder="Search Tasks"
         placeholderTextColor="#999"
         value={search}
@@ -121,12 +123,12 @@ export default function TaskScreen({ route }) {
           />
         )}
         renderSectionHeader={({ section: { title } }) => (
-          <Text style={styles.sectionHeader}>{title}</Text>
+          <Text style={[styles.sectionHeader,{fontSize:textSize}]}>{title}</Text>
         )}
         ListHeaderComponent={
           <View style={styles.inputContainer}>
             <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>
-              <Text style={styles.addButtonText}>Add New Task</Text>
+              <Text style={[styles.addButtonText,{fontSize:textSize}]}>Add New Task</Text>
             </TouchableOpacity>
           </View>
         }
@@ -139,17 +141,17 @@ export default function TaskScreen({ route }) {
             placeholder="Task Title"
             value={text}
             onChangeText={setText}
-            style={styles.textInput}
+            style={[styles.textInput,{fontSize:textSize}]}
           />
           <TextInput
             placeholder="Task Description"
             value={description}
             onChangeText={setDescription}
-            style={styles.textInput}
+            style={[styles.textInput,{fontSize:textSize}]}
           />
           
           <TouchableOpacity onPress={() => setShowDatePicker(true)}>
-            <Text>Select Due Date: {dueDate.toDateString()}</Text>
+            <Text style={{fontSize:textSize}}>Select Due Date: {dueDate.toDateString()}</Text>
           </TouchableOpacity>
 
           {showDatePicker && (
@@ -179,7 +181,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#f2f2f2',
   },
   searchInput: {
-    fontSize: 16,
     padding: 10,
     marginBottom: 20,
     borderWidth: 1,
@@ -189,7 +190,7 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   sectionHeader: {
-    fontSize: 18,
+    
     fontWeight: 'bold',
     marginVertical: 10,
     color: '#666',
@@ -205,7 +206,6 @@ const styles = StyleSheet.create({
   },
   textInput: {
     flex: 1,
-    fontSize: 16,
     padding: 10,
     color: '#333',
     borderRadius: 8,
@@ -222,7 +222,6 @@ const styles = StyleSheet.create({
   },
   addButtonText: {
     color: '#fff',
-    fontSize: 16,
   },
   modalView: {
     flex: 1,
