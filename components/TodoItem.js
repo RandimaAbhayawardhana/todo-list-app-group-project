@@ -1,215 +1,258 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Modal, TextInput, Image } from 'react-native';
-import CheckBox from 'expo-checkbox';
-import { Swipeable } from 'react-native-gesture-handler';
-import { launchImageLibrary } from 'react-native-image-picker';
+import Checkbox from 'expo-checkbox';
+import React, { useState, useRef, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, Alert } from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
-export default function TodoItem({ task, deleteTask, toggleCompleted, editTask }) {
-  const [isEditModalVisible, setEditModalVisible] = useState(false);
-  const [isViewModalVisible, setViewModalVisible] = useState(false);
-  const [newTaskText, setNewTaskText] = useState(task.text);
-  const [notes, setNotes] = useState(task.notes || '');
-  const [attachment, setAttachment] = useState(task.attachment || null);
+const styles = StyleSheet.create({
+  todoItem: {
+    padding: 16,
+    marginVertical: 10,
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    borderColor: '#e0e0e0',
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  checkboxContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  todoItemText: {
+    flex: 1,
+    fontSize: 18,
+    color: '#333',
+    marginLeft: 10,
+    fontWeight: '600',
+  },
+  completed: {
+    textDecorationLine: 'line-through',
+    color: '#bbb',
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  button: {
+    marginLeft: 10,
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: '#1d4ed8',
+  },
+  buttonIcon: {
+    color: '#fff',
+    fontSize: 20,
+  },
+  textInput: {
+    flex: 1,
+    padding: 10,
+    borderBottomWidth: 1,
+    borderColor: '#d1d5db',
+    backgroundColor: '#f7f9fc',
+    borderRadius: 6,
+  },
+  detailsContainer: {
+    marginTop: 10,
+    paddingHorizontal: 10,
+  },
+  detailText: {
+    fontSize: 14,
+    color: '#6b7280',
+  },
+  subtaskContainer: {
+    marginTop: 10,
+  },
+  subtaskText: {
+    paddingVertical: 6,
+    fontSize: 16,
+  },
+  addSubtaskContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  addSubtaskInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    paddingHorizontal: 10,
+    borderRadius: 6,
+    backgroundColor: '#ffffff',
+  },
+  addSubtaskButton: {
+    marginLeft: 10,
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: '#34d399',
+  },
+  showDetailsButton: {
+    marginTop: 10,
+    backgroundColor: '#2563eb',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    alignSelf: 'flex-end',
+  },
+});
 
-  const handleEdit = () => {
-    editTask(task.id, { text: newTaskText, notes, attachment });
-    setEditModalVisible(false);
-  };
+export default function TodoItem({ task, deleteTask, toggleCompleted, editTask, toggleStarred, addSubtask, toggleSubtask }) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [newText, setNewText] = useState(task.text);
+  const [showDetails, setShowDetails] = useState(false);
+  const [newSubtaskText, setNewSubtaskText] = useState('');
+  const inputRef = useRef(null);
 
-  const handleAddAttachment = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      setAttachment(result.assets[0].uri);
+  function handleSave() {
+    if (newText.trim() !== '') {
+      editTask(task.id, newText);
+      setIsEditing(false);
+    } else {
+      setIsEditing(false);
     }
+  }
+
+  function handleAddSubtask() {
+    if (newSubtaskText.trim() !== '') {
+      addSubtask(task.id, newSubtaskText);
+      setNewSubtaskText('');
+    }
+  }
+
+  const handleDelete = () => {
+    Alert.alert(
+      "Confirm Delete",
+      "Are you sure you want to delete this task?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          onPress: () => deleteTask(task.id),
+          style: "destructive",
+        },
+      ],
+      { cancelable: false }
+    );
   };
 
-  const renderRightActions = () => (
-    <View style={styles.actionsContainer}>
-      <TouchableOpacity onPress={() => deleteTask(task.id)} style={styles.deleteButton}>
-        <Text style={styles.actionText}>Delete</Text>
-      </TouchableOpacity>
-    </View>
-  );
+  useEffect(() => {
+    if (isEditing && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isEditing]);
 
   return (
-    <Swipeable renderRightActions={renderRightActions}>
-      <View style={styles.todoItem}>
-        <CheckBox
+    <View style={styles.todoItem}>
+      <View style={styles.checkboxContainer}>
+        <Checkbox
           value={task.completed}
           onValueChange={() => toggleCompleted(task.id)}
           tintColors={{ true: '#4CAF50', false: '#ccc' }}
         />
-        <Text style={[styles.taskText, task.completed && styles.completedText]}>{task.text}</Text>
-
-        {/* View Button */}
-        <TouchableOpacity style={styles.viewButton} onPress={() => setViewModalVisible(true)}>
-          <Text style={styles.viewButtonText}>View</Text>
-        </TouchableOpacity>
-
-        {/* Edit Button */}
-        <TouchableOpacity style={styles.editButton} onPress={() => setEditModalVisible(true)}>
-          <Text style={styles.editButtonText}>Edit</Text>
-        </TouchableOpacity>
-
-        {/* Edit Task Modal */}
-        <Modal visible={isEditModalVisible} transparent={true}>
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <TextInput
-                style={styles.modalInput}
-                value={newTaskText}
-                onChangeText={setNewTaskText}
-                placeholder="Edit task"
-              />
-              <TextInput
-                style={styles.modalInput}
-                value={notes}
-                onChangeText={setNotes}
-                placeholder="Add notes"
-              />
-              <TouchableOpacity onPress={handleAddAttachment} style={styles.attachmentButton}>
-                <Text style={styles.attachmentButtonText}>Add Attachment</Text>
-              </TouchableOpacity>
-              {attachment && <Image source={{ uri: attachment }} style={styles.attachmentImage} />}
-              <TouchableOpacity style={styles.modalButton} onPress={handleEdit}>
-                <Text style={styles.modalButtonText}>Save</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Modal>
-
-        {/* View Task Modal */}
-        <Modal visible={isViewModalVisible} transparent={true}>
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Task Details</Text>
-              <Text style={styles.taskDetailText}>Task: {task.text}</Text>
-              <Text style={styles.taskDetailText}>Notes: {notes}</Text>
-              {attachment && (
-                <Image source={{ uri: attachment }} style={styles.attachmentImage} />
-              )}
-              <Text style={styles.taskDetailText}>
-                Status: {task.completed ? 'Completed' : 'Incomplete'}
-              </Text>
-              <TouchableOpacity style={styles.modalButton} onPress={() => setViewModalVisible(false)}>
-                <Text style={styles.modalButtonText}>Close</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Modal>
+        {isEditing ? (
+          <TextInput
+            ref={inputRef}
+            style={styles.textInput}
+            value={newText}
+            onChangeText={setNewText}
+            onSubmitEditing={handleSave}
+            returnKeyType="done"
+          />
+        ) : (
+          <Text style={[styles.todoItemText, task.completed && styles.completed]}>
+            {task.text}
+          </Text>
+        )}
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => toggleStarred(task.id)}
+          >
+            <Icon
+              name={task.starred ? "star" : "star-outline"}
+              style={styles.buttonIcon}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => (isEditing ? handleSave() : setIsEditing(true))}
+          >
+            <Icon
+              name={isEditing ? "content-save" : "pencil"}
+              style={styles.buttonIcon}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={handleDelete}
+          >
+            <Icon
+              name="trash-can"
+              style={styles.buttonIcon}
+            />
+          </TouchableOpacity>
+        </View>
       </View>
-    </Swipeable>
+
+      <View style={styles.subtaskContainer}>
+        <FlatList
+          data={task.subtasks}
+          keyExtractor={(item, index) => index.toString()}
+          renderItem={({ item, index }) => (
+            <View style={styles.checkboxContainer}>
+              <Checkbox
+                value={item.completed}
+                onValueChange={() => toggleSubtask(task.id, index)}
+              />
+              <Text style={[styles.subtaskText, item.completed && styles.completed]}>{item.text}</Text>
+            </View>
+          )}
+        />
+      </View>
+
+      <View style={styles.addSubtaskContainer}>
+        <TextInput
+          style={styles.addSubtaskInput}
+          value={newSubtaskText}
+          onChangeText={setNewSubtaskText}
+          placeholder="Add Subtask"
+        />
+        <TouchableOpacity style={styles.addSubtaskButton} onPress={handleAddSubtask}>
+          <Icon name="plus" style={styles.buttonIcon} />
+        </TouchableOpacity>
+      </View>
+
+      <TouchableOpacity
+        style={styles.showDetailsButton}
+        onPress={() => setShowDetails(!showDetails)}
+      >
+        <Icon
+          name={showDetails ? "chevron-up" : "chevron-down"}
+          size={24}
+          color="#fff"
+        />
+      </TouchableOpacity>
+
+      {showDetails && (
+        <View style={styles.detailsContainer}>
+          <Text style={styles.detailText}>
+            Due Date: {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'None'}
+          </Text>
+          <Text style={styles.detailText}>
+            Due Time: {task.dueTime ? new Date(task.dueTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'None'}
+          </Text>
+          <Text style={styles.detailText}>
+            Created At: {task.id ? new Date(task.id).toLocaleString([], { hour: '2-digit', minute: '2-digit', month: 'long', day: 'numeric', year: 'numeric' }) : 'None'}
+          </Text>
+          <Text style={styles.detailText}>Priority: {task.priority}</Text>
+        </View>
+      )}
+    </View>
   );
 }
-
-const styles = StyleSheet.create({
-  todoItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 10,
-    backgroundColor: '#fff',
-    marginVertical: 5,
-    borderRadius: 5,
-    elevation: 1,
-  },
-  taskText: {
-    flex: 1,
-    marginLeft: 10,
-    fontSize: 16,
-    color: '#333',
-  },
-  completedText: {
-    textDecorationLine: 'line-through',
-    color: '#999',
-  },
-  editButton: {
-    backgroundColor: '#2196F3',
-    padding: 5,
-    marginRight: 10,
-    borderRadius: 5,
-  },
-  viewButton: {
-    backgroundColor: '#FFA500',
-    padding: 5,
-    marginRight: 10,
-    borderRadius: 5,
-  },
-  viewButtonText: {
-    color: '#fff',
-    fontSize: 14,
-  },
-  actionsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    backgroundColor: '#FF6347',
-    width: 100,
-    height: '100%',
-    borderRadius: 5,
-  },
-  deleteButton: {
-    justifyContent: 'center',
-    paddingHorizontal: 10,
-  },
-  actionText: {
-    color: '#fff',
-    fontSize: 16,
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContent: {
-    backgroundColor: '#fff',
-    padding: 20,
-    borderRadius: 10,
-    width: 300,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  taskDetailText: {
-    fontSize: 16,
-    marginVertical: 5,
-  },
-  modalInput: {
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
-    marginBottom: 20,
-    padding: 10,
-  },
-  modalButton: {
-    backgroundColor: '#4CAF50',
-    padding: 10,
-    borderRadius: 5,
-  },
-  modalButtonText: {
-    color: '#fff',
-    textAlign: 'center',
-    fontSize: 16,
-  },
-  attachmentButton: {
-    backgroundColor: '#2196F3',
-    padding: 10,
-    marginVertical: 10,
-    borderRadius: 5,
-  },
-  attachmentButtonText: {
-    color: '#fff',
-    textAlign: 'center',
-  },
-  attachmentImage: {
-    width: 100,
-    height: 100,
-    marginTop: 10,
-  },
-});

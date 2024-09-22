@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, Alert, TextInput, Modal, Button } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-//import SidebarWrapper from '../components/SidebarWrapper';
+import SidebarWrapper from '../components/SidebarWrapper';
 
 export default function ListScreen() {
   const navigation = useNavigation();
