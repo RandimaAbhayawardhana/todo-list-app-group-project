@@ -3,13 +3,13 @@ import {
   View, TextInput, Text, TouchableOpacity, StyleSheet, Button, FlatList, Platform,
 } from 'react-native';
 import TodoItem from './TodoItem'; 
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons'; 
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Picker } from '@react-native-picker/picker';  
-import * as Notifications from 'expo-notifications'; 
+import * as Notifications from 'expo-notifications';
+import { useTheme } from '../App'; 
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import * as Speech from 'expo-speech'; 
 //import * as SpeechRecognition from 'some-speech-recognition-library';
-import { useTheme } from '../App'; 
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import Voice from 'react-native-voice';
 import { useWindowDimensions } from 'react-native';
 
@@ -50,6 +50,19 @@ const TodoList = () => {
   const [selectedSort, setSelectedSort] = useState('Sort by');
   
   
+  useEffect(() => {
+    const saveTasks = async () => {
+      try {
+        await AsyncStorage.setItem('tasks', JSON.stringify(tasks));
+      } catch (error) {
+        console.error('Error saving tasks:', error);
+      }
+    };
+
+    if (tasks.length > 0) {
+      saveTasks();
+    }
+  }, [tasks]);
 
   
   useEffect(() => {
@@ -66,23 +79,6 @@ const TodoList = () => {
     loadTasks();
   }, []);
 
-
-   // Save tasks to AsyncStorage whenever they are updated
-   useEffect(() => {
-    const saveTasks = async () => {
-      try {
-        await AsyncStorage.setItem('tasks', JSON.stringify(tasks));
-      } catch (error) {
-        console.error('Error saving tasks:', error);
-      }
-    };
-
-    if (tasks.length > 0) {
-      saveTasks();
-    }
-  }, [tasks]);
-   
-
   useEffect(() => {
     Notifications.setNotificationHandler({
       handleNotification: async () => ({
@@ -94,7 +90,31 @@ const TodoList = () => {
     requestPermissions();
   }, []);
 
-  //Function to schedule a notification for an upcoming task
+  // const deleteList = (listId) => {
+  //   if (lists.length === 1) {
+  //     Alert.alert('Error', 'You cannot delete the last list!');
+  //     return;
+  //   }
+  //   Alert.alert(
+  //     'Delete List',
+  //     'Are you sure you want to delete this list?',
+  //     [
+  //       { text: 'Cancel', style: 'cancel' },
+  //       {
+  //         text: 'Delete',
+  //         style: 'destructive',
+  //         onPress: () => {
+  //           const updatedLists = lists.filter(list => list.id !== listId);
+  //           setLists(updatedLists);
+  //           setSelectedListId(updatedLists.length > 0 ? updatedLists[0].id : null);
+  //         },
+  //       },
+  //     ]
+  //   );
+  // };
+
+
+
   const scheduleTaskNotification = (task) => {
     const dueDateTime = new Date(task.dueDate);
     dueDateTime.setHours(new Date(task.dueTime).getHours());
@@ -116,6 +136,23 @@ const TodoList = () => {
     }
   };
 
+  const resetInputs = () => {
+    setText('');
+    setDueDate(new Date());
+    setDueTime(new Date());
+    setPriority('Medium');
+    setFilteredTasks([]);
+  };
+
+  // const addList = () => {
+  //   if (newListName.trim() !== '') {
+  //     const newList = { id: Date.now(), name: newListName, tasks: [] };
+  //     setLists([...lists, newList]);
+  //     setSelectedListId(newList.id);
+  //     setNewListName('');
+  //   }
+  // };
+
 
   const isValidTask = (task) => {
     if (!task.trim()) return false;
@@ -124,15 +161,6 @@ const TodoList = () => {
     if (task.length <= 1 || regex.test(task)) return false;
   
     return true;
-  };
-  
-
-  const resetInputs = () => {
-    setText('');
-    setDueDate(new Date());
-    setDueTime(new Date());
-    setPriority('Medium');
-    setFilteredTasks([]);
   };
 
   // Adding subtasks
@@ -259,6 +287,14 @@ const TodoList = () => {
       setIsListening(false);
     }
   };
+
+  // const startVoiceRecognition = async () => {
+  //   try {
+  //     await Voice.start('en-US');
+  //   } catch (error) {
+  //     console.error('Error starting Voice:', error);
+  //   }
+  // };
   
 
   const renderTimePicker = () => (

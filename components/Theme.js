@@ -3,6 +3,23 @@ import { useColorScheme } from 'react-native';
 
 export const Theme = createContext();
 
+export const ThemeProvider = ({ children }) => {
+  const systemTheme = useColorScheme();
+  
+  const [theme, setTheme] = useState(systemTheme === 'dark' ? darkTheme : lightTheme); 
+
+  const toggleTheme = () => {
+    setTheme((prevTheme) => (prevTheme.dark ? lightTheme : darkTheme));
+  };
+
+  return (
+    <Theme.Provider value={{ theme, toggleTheme }}>
+      {children}
+    </Theme.Provider>
+  );
+};
+
+
 const lightTheme = {
   dark: false,
   colors: {
@@ -19,22 +36,6 @@ const darkTheme = {
     text: '#FFFFFF',
     primary: '#BB86FC',
   },
-};
-
-export const ThemeProvider = ({ children }) => {
-  const systemTheme = useColorScheme();
-  
-  const [theme, setTheme] = useState(systemTheme === 'dark' ? darkTheme : lightTheme); 
-
-  const toggleTheme = () => {
-    setTheme((prevTheme) => (prevTheme.dark ? lightTheme : darkTheme));
-  };
-
-  return (
-    <Theme.Provider value={{ theme, toggleTheme }}>
-      {children}
-    </Theme.Provider>
-  );
 };
 
 export const useTheme = () => useContext();

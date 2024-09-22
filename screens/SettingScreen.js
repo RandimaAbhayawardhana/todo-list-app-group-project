@@ -60,7 +60,7 @@ const SettingsScreen = ({ navigation }) => {
 
       {/* Version Information */}
       <View style={styles.versionContainer}>
-        <Text style={[styles.versionText, { color: theme.colors.text }]}>Version: 2.03.2024</Text>
+        <Text style={[styles.versionText, { color: theme.colors.text }]}>Version: 2.3.28</Text>
       </View>
     </View>
   );
