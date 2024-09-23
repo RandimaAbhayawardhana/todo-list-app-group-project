@@ -58,7 +58,7 @@ function DrawerNavigator({ user,starredTasks }) {
        <Drawer.Screen
         name="StarredTasks"
         component={StarredTasks}
-        initialParams={{ starredTasks: [] }} // Pass empty array as default if no starred tasks
+        initialParams={{ starredTasks: [] }}
        />
       <Drawer.Screen name="Settings" component={SettingScreen} />
       <Drawer.Screen name="Help & Support" component={HelpAndSupportScreen} />
@@ -82,7 +82,7 @@ function AppNavigator({ user }) {
       </Stack.Screen>
       <Stack.Screen 
         name="SignUp" 
-        component={SignUpScreen} // Add SignUpScreen to the navigator
+        component={SignUpScreen}
         options={{ headerShown: false }} 
       />
       <Stack.Screen 
@@ -98,8 +98,7 @@ function AppNavigator({ user }) {
 export default function App() {
   const systemScheme = useColorScheme();
   const [theme, setTheme] = useState(systemScheme === 'dark' ? DarkTheme : DefaultTheme);
-  const [user, setUser] = useState(null);  // Store user info after login
-
+  const [user, setUser] = useState(null);
   const toggleTheme = () => {
     setTheme((currentTheme) =>
       currentTheme.dark ? DefaultTheme : DarkTheme
